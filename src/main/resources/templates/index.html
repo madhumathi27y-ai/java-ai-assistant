@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Java AI Assistant</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        form {
+            margin: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* CHAT */
+
+        .chat-container {
+            width: 60%;
+            max-height: 450px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .chat {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 12px;
+            max-width: 70%;
+            position: relative;
+        }
+
+        .user {
+            background: #ff6600;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .ai {
+            background: #333;
+            color: #fff;
+            margin-right: auto;
+        }
+
+        /* Timestamp */
+        .time {
+            font-size: 0.7em;
+            opacity: 0.6;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Typing animation */
+        .typing {
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+
+        /* Floating bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: rise 15s infinite;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(100vh) scale(0.5); }
+            100% { transform: translateY(-50px) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🤖 Java AI Assistant</h1>
+
+<form th:action="@{/ask}" method="post" onsubmit="showTyping()">
+    <input type="text" name="question" placeholder="Ask me anything..." required />
+    <button type="submit">Send</button>
+</form>
+
+<!-- CHAT HISTORY -->
+<div class="chat-container" id="chatBox" th:if="${chatHistory}">
+    <div th:each="msg : ${chatHistory}">
+
+        <!-- USER -->
+        <div th:if="${msg.role == 'USER'}" class="chat user">
+            <span th:text="${msg.text}"></span>
+            <span class="time"
+                  th:text="${#temporals.format(msg.time, 'HH:mm:ss')}"></span>
+        </div>
+
+        <!-- AI -->
+        <div th:if="${msg.role == 'AI'}" class="chat ai">
+            <span th:text="${msg.text}"></span>
+            <span class="time"
+                  th:text="${#temporals.format(msg.time, 'HH:mm:ss')}"></span>
+        </div>
+
+    </div>
+</div>
+
+<!-- Typing Indicator -->
+<div id="typing" class="chat ai typing" style="display:none;">
+    AI is thinking<span class="dots"></span>
+</div>
+
+<script>
+    function showTyping() {
+        document.getElementById("typing").style.display = "block";
+    }
+
+    // Auto scroll
+    const chatBox = document.getElementById("chatBox");
+    if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Floating bubbles
+    const colors = ['#ff5722', '#03a9f4', '#4caf50', '#ffeb3b', '#9c27b0'];
+    for (let i = 0; i < 25; i++) {
+        let b = document.createElement('div');
+        b.className = 'bubble';
+        b.style.width = b.style.height = `${Math.random()*30 + 10}px`;
+        b.style.left = `${Math.random()*100}vw`;
+        b.style.background = colors[Math.floor(Math.random()*colors.length)];
+        b.style.animationDuration = `${10 + Math.random()*10}s`;
+        document.body.appendChild(b);
+    }
+</script>
+
+</body>
+</html>
